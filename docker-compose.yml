@@ -1,0 +1,16 @@
+version: "2.4"
+
+services:
+    bitfinex_proxy:
+        build: .
+        command:
+        depends_on:
+        environment:
+        volumes:
+            - ./bitfinex_proxy:/app
+            - ./setup.cfg:/app/setup.cfg
+            - ./scripts/test.sh:/app/test.sh
+
+    postgres:
+        image: postgres:11
+        shm_size: 1gb
