@@ -11,3 +11,5 @@ COPY src/ setup.cfg scripts/test.sh /app/
 ENV PYTHONPATH="./bitfinex_proxy"
 
 WORKDIR /app/
+
+CMD ["gunicorn", "app:application", "-k", "aiohttp.GunicornUVLoopWebWorker"]
