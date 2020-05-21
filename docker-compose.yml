@@ -4,7 +4,9 @@ services:
     bitfinex_proxy:
         build: .
         depends_on:
+            - postgres
         environment:
+            POSTGRES_DSN: postgres://postgres:postgres@postgres/bitfinex_proxy
         volumes:
             - ./bitfinex_proxy:/app
             - ./setup.cfg:/app/setup.cfg
