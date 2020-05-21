@@ -1,15 +1,15 @@
-FROM python:3.6
+FROM python:3.8-slim
 
-COPY requirements.txt /tmp/
+RUN mkdir -p /app/ && \
+    pip install pipenv
 
-RUN mkdir -p /tmp/bitfinex_proxy/.pytest_cache/ && \
-    pip install -r /tmp/requirements.txt && \
-    rm /tmp/requirements.txt
-
-COPY src/ setup.cfg scripts/test.sh /app/
-
-ENV PYTHONPATH="./bitfinex_proxy"
+COPY bitfinex_proxy/ Pipfile Pipfile.lock setup.cfg scripts/test.sh /app/
 
 WORKDIR /app/
+
+RUN mkdir -p /tmp/bitfinex_proxy/.pytest_cache/ && \
+    pipenv install --system --ignore-pipfile --clear --deploy --dev
+
+ENV PYTHONPATH="."
 
 CMD ["gunicorn", "app:application", "-k", "aiohttp.GunicornUVLoopWebWorker"]
