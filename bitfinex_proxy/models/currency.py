@@ -1,23 +1,15 @@
 """Home for `Currency` model."""
-from sqlalchemy import (
-    Column,
-    String,
-)
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.ext.declarative import declarative_base
+import sqlalchemy as sa
 
-Base: type = declarative_base()
+from .base import Base
 
 
 class Currency(Base):  # type: ignore
     """Model for currency.
 
     Attributes:
-        id (UUID): PK.
         slug (str): Technical name.
     """
 
     __tablename__ = 'currency'
-
-    id = Column(UUID(as_uuid=True), primary_key=True)
-    slug = Column(String(3))
+    slug: str = sa.Column(sa.String(3), primary_key=True)
