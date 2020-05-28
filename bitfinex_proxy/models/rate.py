@@ -25,7 +25,8 @@ class Rate(Base):  # type: ignore
     currency_slug: str = sa.Column(
         sa.String(3),
         sa.ForeignKey('currency.slug'),
+        nullable=False,
     )
-    traded_at: date = sa.Column(sa.Date)
-    rate: Decimal = sa.Column(sa.Numeric(precision=5))
-    volume: Decimal = sa.Column(sa.Numeric(precision=5))
+    traded_at: date = sa.Column(sa.Date, nullable=False)
+    rate: Decimal = sa.Column(sa.Numeric(precision=5), nullable=False)
+    volume: Decimal = sa.Column(sa.Numeric(precision=5), nullable=False)
