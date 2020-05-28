@@ -3,4 +3,4 @@ set -ex
 CODE=0
 WORKDIR=`dirname $0`
 cd $WORKDIR/..
-PYTHONPATH=./bitfinex_proxy pytest $*
+PYTHONPATH=./bitfinex_proxy pipenv run pytest $*

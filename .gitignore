@@ -2,3 +2,5 @@
 __pycache__/
 .env
 .venv/
+bitfinex_proxy/setup.cfg
+bitfinex_proxy/test.sh

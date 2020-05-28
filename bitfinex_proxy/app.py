@@ -1,7 +1,7 @@
-"""Summary.
+"""Application description.
 
 Attributes:
-    application (TYPE): Description.
+    application (BitfinexProxyApplication): Application instance.
 """
 from aiohttp import web
 
@@ -12,16 +12,12 @@ class BitfinexProxyApplication(web.Application):
     """BitfinexProxy web Application."""
 
     def __init__(self, **kwargs):
-        """Summary.
-
-        Args:
-            **kwargs: Description.
-        """
+        """Init application instance."""
         super().__init__(**kwargs)
         self.register_routes()
 
     def register_routes(self):
-        """Summary."""
+        """Register all API routes."""
         for route in ROUTES:
             if isinstance(route, web.RouteDef):
                 route.register(self.router)

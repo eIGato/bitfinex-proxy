@@ -1,4 +1,4 @@
-"""Summary."""
+"""API routes description."""
 import typing as t
 
 from aiohttp import web
