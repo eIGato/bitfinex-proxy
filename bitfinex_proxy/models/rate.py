@@ -5,6 +5,7 @@ from uuid import UUID
 
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
+from sqlalchemy.orm import relationship
 
 from .base import Base
 
@@ -21,6 +22,7 @@ class Rate(Base):  # type: ignore
     """
 
     __tablename__ = 'rate'
+
     id: UUID = sa.Column(postgresql.UUID(as_uuid=True), primary_key=True)
     currency_slug: str = sa.Column(
         sa.String(3),
@@ -30,3 +32,5 @@ class Rate(Base):  # type: ignore
     traded_at: date = sa.Column(sa.Date, nullable=False)
     rate: Decimal = sa.Column(sa.Numeric(precision=5), nullable=False)
     volume: Decimal = sa.Column(sa.Numeric(precision=5), nullable=False)
+
+    currency = relationship('Currency', back_populates='rates')
