@@ -7,6 +7,8 @@ services:
             - postgres
         environment:
             POSTGRES_DSN: postgres://postgres:postgres@postgres/bitfinex_proxy
+        ports:
+            - 8080:80
         volumes:
             - ./bitfinex_proxy:/app
             - ./setup.cfg:/app/setup.cfg

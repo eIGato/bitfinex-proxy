@@ -12,4 +12,9 @@ RUN mkdir -p /tmp/bitfinex_proxy/.pytest_cache/ && \
 
 ENV PYTHONPATH="."
 
-CMD ["gunicorn", "app:application", "-k", "aiohttp.GunicornUVLoopWebWorker"]
+CMD [ \
+    "gunicorn", \
+    "-k", "aiohttp.GunicornUVLoopWebWorker", \
+    "-b", "0.0.0.0:80", \
+    "app:application" \
+]

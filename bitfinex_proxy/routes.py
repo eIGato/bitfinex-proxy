@@ -3,4 +3,8 @@ import typing as t
 
 from aiohttp import web
 
-ROUTES: t.Tuple[t.Union[web.RouteDef, tuple], ...] = ()
+from api import currencies
+
+ROUTES: t.Tuple[t.Union[web.RouteDef, t.Tuple[str, t.Type[web.View]]], ...] = (
+    ('/api/currencies/', currencies.CurrencyListView),
+)
