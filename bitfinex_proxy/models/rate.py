@@ -1,4 +1,5 @@
 """Home for `Rate` model."""
+import typing as t
 from datetime import date
 from decimal import Decimal
 from uuid import UUID
@@ -34,3 +35,30 @@ class Rate(Base):  # type: ignore
     volume: Decimal = sa.Column(sa.Numeric(precision=5), nullable=False)
 
     currency = relationship('Currency', back_populates='rates')
+
+    @classmethod
+    def from_candle(
+        cls,
+        candle: t.List[float],
+        traded_at: date,
+        currency_slug: str,
+    ) -> 'Rate':
+        """Build `Rate` instance from Bitfinex candle."""
+        return cls(
+            currency_slug=currency_slug,
+            traded_at=traded_at,
+            rate=candle[2],
+            volume=candle[5],
+        )
+
+    def to_dict(self) -> dict:
+        """Convert `Rate` instance to `dict`."""
+        return {
+            attr: getattr(self, attr)
+            for attr in [
+                'currency_slug',
+                'traded_at',
+                'rate',
+                'volume',
+            ]
+        }
