@@ -10,6 +10,7 @@ from aiohttp import web
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm import Session
 
+from connections.bitfinex import BitfinexClient
 from connections.postgres import (
     init_pg,
     stop_pg,
@@ -32,6 +33,7 @@ class BitfinexProxyApplication(web.Application):
         self.register_routes()
         self.on_startup.append(init_pg)
         self.on_cleanup.append(stop_pg)
+        self.bitfinex_client = BitfinexClient()
 
     @staticmethod
     def get_db_session() -> Session:

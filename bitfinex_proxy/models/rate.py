@@ -2,7 +2,10 @@
 import typing as t
 from datetime import date
 from decimal import Decimal
-from uuid import UUID
+from uuid import (
+    UUID,
+    uuid4,
+)
 
 import sqlalchemy as sa
 from sqlalchemy.dialects import postgresql
@@ -24,15 +27,25 @@ class Rate(Base):  # type: ignore
 
     __tablename__ = 'rate'
 
-    id: UUID = sa.Column(postgresql.UUID(as_uuid=True), primary_key=True)
+    id: UUID = sa.Column(
+        postgresql.UUID(as_uuid=True),
+        default=uuid4,
+        primary_key=True,
+    )
     currency_slug: str = sa.Column(
         sa.String(3),
         sa.ForeignKey('currency.slug'),
         nullable=False,
     )
     traded_at: date = sa.Column(sa.Date, nullable=False)
-    rate: Decimal = sa.Column(sa.Numeric(precision=5), nullable=False)
-    volume: Decimal = sa.Column(sa.Numeric(precision=5), nullable=False)
+    rate: Decimal = sa.Column(
+        sa.Numeric(precision=16, scale=8),
+        nullable=False,
+    )
+    volume: Decimal = sa.Column(
+        sa.Numeric(precision=16, scale=8),
+        nullable=False,
+    )
 
     currency = relationship('Currency', back_populates='rates')
 
@@ -57,7 +70,6 @@ class Rate(Base):  # type: ignore
             attr: getattr(self, attr)
             for attr in [
                 'currency_slug',
-                'traded_at',
                 'rate',
                 'volume',
             ]

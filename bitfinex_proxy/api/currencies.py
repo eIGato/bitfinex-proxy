@@ -1,11 +1,11 @@
 """Home for `/currencies/` API branch."""
 
-import json
 from datetime import (
     date,
     timedelta,
 )
 
+import ujson as json
 from aiohttp import web
 from sqlalchemy.orm import Session
 
@@ -32,40 +32,43 @@ class CurrencyListView(web.View):
 class CurrencyView(web.View):
     """View currency by slug."""
 
-    async def get(self, slug: str) -> web.Response:
+    async def get(self) -> web.Response:
         """Get currency with rate and trading volume."""
+        slug = self.request.match_info['slug'].upper()
         if not 2 <= len(slug) <= 3:
             return web.Response(status=404)
         today = date.today()
-        slug = slug.upper()
         session: Session = self.request.app.get_db_session()  # type: ignore
         currency = session.query(Currency).filter(
             Currency.slug == slug,
         ).one_or_none()
         bitfinex_client = self.request.app.bitfinex_client  # type: ignore
         if currency is not None:
-            rates = session.query(currency.rates).filter(
+            rates = session.query(Rate).filter(
+                Rate.currency_slug == slug,
                 Rate.traded_at >= today - timedelta(VOLUME_AGG_SPAN),
             )
-            if len(rates) >= VOLUME_AGG_SPAN:
+            rates_count = rates.count()
+            if rates_count >= VOLUME_AGG_SPAN:
                 return web.Response(
                     text=json.dumps({
                         'slug': slug,
-                        'rates': [dict(rate) for rate in rates],
+                        'rates': [rate.to_dict() for rate in rates],
                     }),
                     content_type='application/json',
                 )
             fresh_rates = await bitfinex_client.get_rates(
                 slug,
-                VOLUME_AGG_SPAN - len(rates),
+                VOLUME_AGG_SPAN - rates_count,
                 today=today,
             )
-            session.add(fresh_rates)
+            for rate in fresh_rates:
+                session.add(rate)
             session.commit()
             return web.Response(
                 text=json.dumps({
                     'slug': slug,
-                    'rates': [dict(rate) for rate in rates + fresh_rates],
+                    'rates': [rate.to_dict() for rate in rates + fresh_rates],
                 }),
                 content_type='application/json',
             )
@@ -78,12 +81,13 @@ class CurrencyView(web.View):
             return web.Response(status=404)
         currency = Currency(slug=slug)
         session.add(currency)
-        session.add(fresh_rates)
+        for rate in fresh_rates:
+            session.add(rate)
         session.commit()
         return web.Response(
             text=json.dumps({
                 'slug': slug,
-                'rates': [dict(rate) for rate in fresh_rates],
+                'rates': [rate.to_dict() for rate in fresh_rates],
             }),
             content_type='application/json',
         )
