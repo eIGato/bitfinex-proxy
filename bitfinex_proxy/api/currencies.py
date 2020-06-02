@@ -1,9 +1,12 @@
 """Home for `/currencies/` API branch."""
 
+import typing as t
 from datetime import (
     date,
     timedelta,
 )
+from decimal import Decimal
+from itertools import chain
 
 import ujson as json
 from aiohttp import web
@@ -14,6 +17,11 @@ from models import (
     Rate,
 )
 from settings import VOLUME_AGG_SPAN
+
+
+def get_volume_avg(rates: t.Iterable[Rate]) -> Decimal:
+    """Calculate average trade volume for given rates."""
+    return sum(rate.volume for rate in rates) / Decimal(VOLUME_AGG_SPAN)
 
 
 class CurrencyListView(web.View):
@@ -36,7 +44,7 @@ class CurrencyView(web.View):
         """Get currency with rate and trading volume."""
         slug = self.request.match_info['slug'].upper()
         if not 2 <= len(slug) <= 3:
-            return web.Response(status=404)
+            return web.Response(text='', status=400)
         today = date.today()
         session: Session = self.request.app.get_db_session()  # type: ignore
         currency = session.query(Currency).filter(
@@ -53,7 +61,8 @@ class CurrencyView(web.View):
                 return web.Response(
                     text=json.dumps({
                         'slug': slug,
-                        'rates': [rate.to_dict() for rate in rates],
+                        'last_rate': rates[-1].rate,
+                        'volume_avg': get_volume_avg(rates),
                     }),
                     content_type='application/json',
                 )
@@ -68,7 +77,8 @@ class CurrencyView(web.View):
             return web.Response(
                 text=json.dumps({
                     'slug': slug,
-                    'rates': [rate.to_dict() for rate in rates + fresh_rates],
+                    'last_rate': fresh_rates[-1].rate,
+                    'volume_avg': get_volume_avg(chain(rates, fresh_rates)),
                 }),
                 content_type='application/json',
             )
@@ -78,7 +88,7 @@ class CurrencyView(web.View):
             today=today,
         )
         if not fresh_rates:
-            return web.Response(status=404)
+            return web.Response(text='', status=400)
         currency = Currency(slug=slug)
         session.add(currency)
         for rate in fresh_rates:
@@ -87,7 +97,8 @@ class CurrencyView(web.View):
         return web.Response(
             text=json.dumps({
                 'slug': slug,
-                'rates': [rate.to_dict() for rate in fresh_rates],
+                'last_rate': fresh_rates[-1].rate,
+                'volume_avg': get_volume_avg(fresh_rates),
             }),
             content_type='application/json',
         )
