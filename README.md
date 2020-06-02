@@ -1,2 +1,1 @@
-# bitfinex-proxy
-Jibrel challenge
+# Bitfinex proxy

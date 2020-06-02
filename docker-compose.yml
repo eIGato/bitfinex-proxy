@@ -1,0 +1,22 @@
+version: "2.4"
+
+services:
+    bitfinex_proxy:
+        build: .
+        depends_on:
+            - postgres
+        environment:
+            POSTGRES_DSN: postgres://postgres:postgres@postgres/bitfinex_proxy
+        ports:
+            - 8080:80
+        volumes:
+            - ./bitfinex_proxy:/app
+            - ./setup.cfg:/app/setup.cfg
+            - ./scripts/test.sh:/app/test.sh
+
+    postgres:
+        image: postgres:11
+        shm_size: 1gb
+        environment:
+            POSTGRES_DB: bitfinex_proxy
+            POSTGRES_PASSWORD: postgres
