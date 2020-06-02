@@ -63,14 +63,3 @@ class Rate(Base):  # type: ignore
             rate=candle[2],
             volume=candle[5],
         )
-
-    def to_dict(self) -> dict:
-        """Convert `Rate` instance to `dict`."""
-        return {
-            attr: getattr(self, attr)
-            for attr in [
-                'currency_slug',
-                'rate',
-                'volume',
-            ]
-        }
